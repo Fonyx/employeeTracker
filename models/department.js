@@ -1,25 +1,12 @@
-const { Model, DataTypes } = require('sequelize');
-const sequelize = require('../config/connection');
-
-class Department extends Model {}
-
-Department.init(
-    {
+module.exports = (sequelize, type) => {
+    return sequelize.define('department', {
         id: {
-            type: DataTypes.INTEGER,
+            type: type.INTEGER,
             primaryKey: true,
             autoIncrement: true,
         },
         name: {
-            type: DataTypes.STRING(30),
-        },
-    },{
-        sequelize,
-        timestamps: true,
-        freezeTableName: true,
-        underscored: true,
-        modelName: 'department',
-    }
-);
-
-module.exports = {Department};
+            type: type.STRING(30),
+        }
+    }  
+)}
