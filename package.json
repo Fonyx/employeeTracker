@@ -4,7 +4,7 @@
   "description": "A node CMS project for employee management",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js",
+    "start": "node index.js",
     "test": "jest --coverage"
   },
   "repository": {

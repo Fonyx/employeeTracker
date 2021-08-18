@@ -1,12 +1,12 @@
-module.exports = (sequelize, type) => {
+module.exports = (sequelize, Sequelize) => {
     return sequelize.define('department', {
         id: {
-            type: type.INTEGER,
+            type: Sequelize.INTEGER,
             primaryKey: true,
             autoIncrement: true,
         },
         name: {
-            type: type.STRING(30),
+            type: Sequelize.STRING(30),
         }
     }  
 )}

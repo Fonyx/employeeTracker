@@ -1,15 +1,18 @@
-module.exports = (sequelize, type) => {
+module.exports = (sequelize, Sequelize) => {
     return sequelize.define('role', {
         id: {
-            type: type.INTEGER,
+            type: Sequelize.INTEGER,
             primaryKey: true,
             autoIncrement: true,
         },
         title: {
-            type: type.STRING(30),
+            type: Sequelize.STRING(30),
         },
         salary: {
-            type: type.FLOAT,
+            type: Sequelize.FLOAT,
+        },
+        departmentId: {
+            type: Sequelize.INTEGER,
         }
     });
 }
