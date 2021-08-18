@@ -23,8 +23,6 @@ const Department = DepartmentModel(sequelize, Sequelize);
 
 
 // relationships with simple foreign keys
-// Manager relationship to Employee
-// Employee.hasMany(Employee, { as: 'manager', foreignKey: 'id'});
 // Employee relationship to Manager
 Employee.belongsTo(Employee, { as: 'employee', foreignKey: 'managerId'});
 // A role has many employees
@@ -32,7 +30,7 @@ Role.hasMany(Employee, { as: 'role', foreignKey: 'roleId'});
 // A department has many roles
 Department.hasMany(Role, { as: 'department', foreignKey: 'departmentId'});
 
-sequelize.sync({force: true}).then(()=>{
+sequelize.sync({force: false}).then(()=>{
     console.log('Database structure built');
 })
 
