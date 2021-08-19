@@ -16,6 +16,7 @@ module.exports = (sequelize, Sequelize) => {
       },
       managerId:{
         type: Sequelize.INTEGER,
+        allowNull: true,
       }
   },{
     // sets table name to not be pluralized, activates interaction timestamps, and 

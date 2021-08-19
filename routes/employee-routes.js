@@ -7,7 +7,23 @@ employeeRouter.get('/all', (req, res) => {
 });
 
 employeeRouter.post('/new', (req, res) => {
-    dbModels.Employee.create(req.body).then(newEmployee => res.send(newEmployee));
+    let department = dbModels.Department.create(req.body)
+    .then(newDept => {
+        console.log(newDept);
+    });
+    let role = dbModels.Role.create({
+        title: 'test-role',
+        salary: 80000,
+        departmentId:department.id
+    }).then(newRole => {
+        console.log(newRole);
+    });
+    dbModels.Employee.create({
+        first_name:'test-first',
+        last_name: 'test-last-name',
+        roleId: role.id,
+        managerId: null
+    }).then(newEmployee => res.send(newEmployee));
 });
 
 
