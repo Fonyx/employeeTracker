@@ -1,13 +1,9 @@
-const { serialize } = require('jest-serializer');
 const {Employee, Role, Department} = require('./sequelize');
 
-const db = {};
+const dbModels = {};
 
-db.serialize = serialize;
-db.Serialize = Serialize;
+dbModels.Employee = Employee;
+dbModels.Role = Role;
+dbModels.Department = Department;
 
-db.Employee = Employee;
-db.Role = Role;
-db.Department = Department;
-
-module.exports = db;
+module.exports = dbModels;

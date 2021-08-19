@@ -7,7 +7,7 @@ const express = require('express');
 // note this db parameter is custom and lacks method name assignments from the sequelize init function
 // since that function doesn't work on node v13 or higher so you can't call db.sync here. It is however 
 // handled in models.sequelize already
-const db = require('../models/index');
+const dbModels = require('./models/index');
 
 // import the api routes from the routes folder - api/employee, role, department
 const api = require('./routes/index');
