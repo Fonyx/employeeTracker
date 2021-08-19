@@ -2,7 +2,6 @@ const Sequelize = require('sequelize');
 const EmployeeModel = require('./employee');
 const RoleModel = require('./role');
 const DepartmentModel = require('./department');
-require('dotenv').config();
 
 // database connection
 const sequelize = new Sequelize(
