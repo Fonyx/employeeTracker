@@ -13,18 +13,11 @@ async function main(){
         database: process.env.DB_NAME
     });
 
-    await comms.addDepartment(connection, {name: "test-department"});
-    await comms.updateDepartment(connection, 4, "Updated Name");
+    await comms.addDepartmentByName(connection, "first department");
+    await comms.addDepartmentByName(connection, "second department");
+    await comms.updateDepartmentNameById(connection, 1, "updated-name");
+    await comms.deleteDepartmentById(connection, 2);
     await comms.getAllDepartments(connection);
-    
-    // const getAllDepartments = async () => {
-    //     let query = `SELECT * FROM department`;
-    //     console.log('Getting all departments from database');
-    //     const[rows, fields] = await connection.execute(query);
-    //     console.table(fields, rows);
-    //     return command;
-    // }
-    // getAllDepartments();
 }
 
 main();

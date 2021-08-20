@@ -5,7 +5,7 @@ USE employee_db;
 
 CREATE TABLE department(
     id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    name VARCHAR(30) NOT NULL
+    name VARCHAR(30) NOT NULL UNIQUE
 );
 
 CREATE TABLE role(
@@ -16,7 +16,9 @@ CREATE TABLE role(
     -- set the department id to null if the department parent is deleted
     FOREIGN KEY (department_id)
         REFERENCES department(id)
-        ON DELETE SET NULL
+        ON DELETE SET NULL,
+    -- combined unique for role in a department
+    CONSTRAINT department_role_id UNIQUE (title,department_id)
 );
 
 CREATE TABLE employee(
@@ -32,5 +34,7 @@ CREATE TABLE employee(
     -- Self reference to employee table for manager
     FOREIGN KEY (manager_id)
         REFERENCES employee(id)
-        ON DELETE SET NULL
+        ON DELETE SET NULL,
+    -- combined unique for employee full name
+    CONSTRAINT full_name UNIQUE (first_name,last_name)
 );
