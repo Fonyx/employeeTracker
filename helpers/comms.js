@@ -1,5 +1,4 @@
 const mysql = require('mysql2/promise');
-const cTable = require('console.table');
 
 // department commands
 /**
@@ -13,7 +12,7 @@ const getAllDepartments = async (connection) => {
 
     try{
         const[rows, _] = await connection.execute(query);
-        console.table(rows);
+        return rows;
     } catch(error){
         console.error(error);
     }
@@ -30,7 +29,7 @@ const addDepartmentByName = async(connection, name) => {
         let query = 'INSERT INTO department(name) VALUES(?)';
         console.log(`Adding department ${name} to db`);
         const[rows, _] = await connection.execute(query, [name]);
-        console.table(rows);
+        return rows;
     } catch(err){
         console.error(err);
     }
@@ -47,7 +46,7 @@ const updateDepartmentNameById = async(connection, id, newName) => {
         let query = "UPDATE department SET name = ? WHERE id = ?";
         console.log(`Updating department at id:${id} to ${newName}`)
         const[rows, _] = await connection.execute(query, [newName, id]);
-        console.table(rows);
+        return rows;
     } catch(err){
         console.error(err);
     }
@@ -65,7 +64,7 @@ const deleteDepartmentById = async(connection, id) => {
         let query = "DELETE FROM department WHERE id =?";
         console.log(`Deleting department at id:${id}`)
         const[rows, _] = await connection.execute(query, [id]);
-        console.table(rows);
+        return rows;
     } catch(err){
         console.error(err);
     }
