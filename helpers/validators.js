@@ -1,19 +1,26 @@
 const confirmStringValidator = async (userText)=> {
     try{
+        // check that we can't turn the userText into a number
         if(parseInt(userText, 10)){
             return false;
         }
     } catch {
         // do nothing
     }
+    // if the type of the user text is not a string
     if(typeof(userText) !== 'string'){
         return false;
     } else {
         if(userText === ''){
             return false
         }
-        return true;
     }
+    // check for special characters
+    let badFormat = /[`!@#$%^&*()_+\=\[\]{};':"\\|,.<>\/?~]/;
+    if(badFormat.test(userText)){
+        return false;
+    }
+    return true;
 }
 
 const confirmIntValidator = async (userText)=> {

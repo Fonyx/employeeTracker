@@ -16,6 +16,16 @@ describe('String validator testing', ()=>{
         const result = await confirmStringValidator('12345');
         expect(result).toBe(false);
     });
+    // UHP should reject strings containing special characters
+    it('Should return false when pass a sql string containing special characters', async() => {
+        const result = await confirmStringValidator(') DROP TABLE department;');
+        expect(result).toBe(false);
+    })
+    // HP should accept strings containing hyphen special character only
+    it('Should return false when pass a sql string containing special characters', async() => {
+        const result = await confirmStringValidator('Sales-Force');
+        expect(result).toBe(true);
+    })
     // happy path
     it('Should return true boolean when passed valid string', async () => {
         const result = await confirmStringValidator('Valid string');
