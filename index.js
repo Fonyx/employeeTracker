@@ -13,7 +13,8 @@ async function main(){
         database: process.env.DB_NAME
     });
 
-    await comms.addDepartment(connection, {name: 'test-department'});
+    await comms.addDepartment(connection, {name: "test-department"});
+    await comms.updateDepartment(connection, 4, "Updated Name");
     await comms.getAllDepartments(connection);
     
     // const getAllDepartments = async () => {
