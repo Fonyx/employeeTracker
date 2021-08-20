@@ -9,12 +9,8 @@ class AnonymousError{
     }
 }
 
-class MissingArgumentError extends AnonymousError{};
-class BadArgumentError extends AnonymousError{};
-class AttributeError extends AnonymousError{};
+class customError extends AnonymousError{};
 
 module.exports = {
-    MissingArgumentError,
-    BadArgumentError,
-    AttributeError
+    customError,
 }
