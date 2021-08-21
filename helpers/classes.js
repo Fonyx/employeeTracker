@@ -52,6 +52,51 @@ class Dict{
         }
     }
 
+    length(){
+        return this.keys.length;
+    }
+
+    get_keys_string(){
+        let result = '';
+        for(let i=0; i<this.keys.length; i++){
+            let current_key = this.keys[i]
+            result += `${current_key}`;
+            // don't add a comma after last entry or SQL will break
+            if(i < this.length() -1){
+                result +=', ';
+            }
+        }
+        return result;
+    }
+
+    get_values_string(){
+        let result = '';
+        for(let i=0; i<this.length(); i++){
+            let current_value = this.values[i]
+            result += `${current_value}`;
+            // don't add a comma after last entry or SQL will break
+            if(i < this.length() -1){
+                result +=', ';
+            }
+        }
+        return result;
+    }
+
+    /**
+     * Method that returns the number of values as a string of ? chars
+     */
+    get_values_as_question_marks(){
+        let result = '';
+        for(let i=0; i<this.values.length; i++){
+            result += '?';
+            // don't add a comma after last entry or SQL will break
+            if(i < this.length() -1){
+                result +=', ';
+            }
+        }
+        return result;
+    }
+
     get_as_list(){
         let result = [];
         for(let i =0; i < this.keys.length; i++){
@@ -68,16 +113,45 @@ class Dict{
             console.error(error);
         }
     }
-    /**Receives a key and returns the corresponding value
+    /**Receives a key and value pair, only adds new pairs to dict
      * 
      * @param {str} key 
-     * @param {obj} value 
+     * @param {str/int} value 
      */
     set(key, value){
         try{
-            let keyIndex = this.keys.findIndex(key);
-            this.values[keyIndex] = value;
-            return true
+            // check if key is already in dict
+            let keyIndex = this.keys.indexOf(key);
+            // indexOf returns -1 if not found
+            if(keyIndex === -1){
+                this.keys.push(key);
+                this.values.push(value);
+                return true
+            }else {
+                console.log('Key already in dictionary, ignore')
+            }
+        } catch(error){
+            console.error(error);
+        }
+    }
+    /**Receives a key and value pair, only changes value if key present
+     * 
+     * @param {str} key 
+     * @param {str/int} value 
+     */
+    update(key, value){
+        try{
+            // check if key is already in dict then update that key
+            let keyIndex = this.keys.indexOf(key);
+            // since the key value pairs are synced we don't need to check for value index
+            // key index will be -1 if not found
+            if(keyIndex !== -1){
+                this.keys[keyIndex] = key;
+                this.values[keyIndex] = value;
+                return true
+            }else {
+                console.log('Key not already in dictionary, will not update missing element, use set instead')
+            }
         } catch(error){
             console.error(error);
         }

@@ -23,6 +23,20 @@ const confirmStringValidator = async (userText)=> {
     return true;
 }
 
+const confirmStringNoSpaceValidator = async(userText) => {
+    let previousValid = await confirmStringValidator(userText);
+    if(previousValid){
+        let spaceRegex = /[ ]/;
+        if(spaceRegex.test(userText)){
+            return false
+        } else {
+            return true;
+        }
+    } else {
+        return false;
+    }
+}
+
 const confirmIntValidator = async (userText)=> {
     // quick check of if userText fails to be turned into an int
         if(isNaN(parseInt(userText, 10))){
@@ -38,7 +52,12 @@ const confirmIntValidator = async (userText)=> {
         return true
 }
 
-module.exports = {
+const validators = {
     confirmStringValidator,
+    confirmStringNoSpaceValidator,
     confirmIntValidator
+}
+
+module.exports = {
+    validators
 }

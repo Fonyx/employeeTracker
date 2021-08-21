@@ -6,7 +6,7 @@ const depComms = require('./lib/depComms');
 const roleComms = require('./lib/roleComms');
 const empComms = require('./lib/empComms');
 const dbComms = require('./lib/dbComms');
-const {confirmStringValidator, confirmIntValidator} = require('./helpers/validators');
+const { validators } = require('./helpers/validators');
 const {Dict} = require('./helpers/classes');
 const {tablePrint, sanitizeErrorForUser} = require('./helpers/functions');
 
@@ -90,13 +90,13 @@ async function viewTableColumns(tableName, columns){
     }
 }
 
-async function updatePrompt(){
-    console.log('View prompt sequence');
+async function addPrompt(){
+    console.log('Add prompt sequence');
     
 }
 
-async function addPrompt(){
-    console.log('Add prompt sequence');
+async function updatePrompt(){
+    console.log('View prompt sequence');
     
 }
 
@@ -105,18 +105,67 @@ async function deletePrompt(){
     
 }
 
-async function addDepartmentPrompt(){
+async function addEmployeePrompt(){
     // add a department
-    await inquirer.prompt({
-        type: 'input',
-        message: 'Name of department?',
-        validate: confirmStringValidator,
-        name: 'departmentName',
-    }).then(async (answer) => {
-        await depComms.addDepartmentByName(answer.departmentName);
-        tablePrint(await depComms.getAllDepartments());
+    let employees = await empComms.getAllEmployees();
+    let employeeNames = employees.map((parameter) => {
+        return parameter.first_name + ' ' + parameter.last_name;
+    })
+    console.log(employeeNames);
+
+    let roles = await roleComms.getAllRoles();
+    let roleNames = roles.map((parameter) => {
+        return parameter.title;
+    })
+    console.log(roleNames);
+    await inquirer.prompt([
+        {
+            type: 'input',
+            message: 'Employee first name?',
+            validate: validators.confirmStringNoSpaceValidator,
+            name: 'firstName',
+        },{
+            type: 'input',
+            message: 'Employee last name?',
+            validate: validators.confirmStringNoSpaceValidator,
+            name: 'lastName',
+        },{
+            type: 'rawlist',
+            message: 'Role?',
+            name: 'roleName',
+            choices: roleNames,
+        },{
+            type: 'rawlist',
+            message: 'Manager?',
+            name: 'managerName',
+            choices: employeeNames,
+            when: () => {
+                console.log(employeeNames);
+                if(employeeNames.length > 0){
+                    return true;
+                } else {
+                    return false
+                }
+            },
+        }
+    ]).then(async (answers) => {
+        // get the role id for the name chosen
+        let roleId = await roleComms.getRoleIdByName(answers.roleName);
+        // build basic params object, omitting manager
+        let paramsDict = new Dict(
+            ['first_name', 'last_name', 'role_id'], 
+            [answers.firstName, answers.lastName, roleId]
+        );
+        // if there is a manager, add it to the params dictionary
+        if(answers.managerName){
+            let managerId = await empComms.getEmployeeIdByName(answers.managerName);
+            paramsDict.set('manager_id', managerId);
+        }
+        await empComms.addEmployeeWithParams(paramsDict);
+        resultTable = await roleComms.getAllRoles();
+        tablePrint(resultTable);
     }).catch((err) => {
-        sanitizeErrorForUser(err);
+        console.error(err);
     })
 }
 
@@ -127,12 +176,12 @@ async function addRolePrompt(){
         {
             type: 'input',
             message: 'Role title?',
-            validate: confirmStringValidator,
+            validate: validators.confirmStringValidator,
             name: 'title',
         },{
             type: 'input',
             message: 'Role salary?',
-            validate: confirmIntValidator,
+            validate: validators.confirmIntValidator,
             name: 'salary',
         },{
             type: 'rawlist',
@@ -151,6 +200,21 @@ async function addRolePrompt(){
         tablePrint(resultTable);
     }).catch((err) => {
         console.error(err);
+    })
+}
+
+async function addDepartmentPrompt(){
+    // add a department
+    await inquirer.prompt({
+        type: 'input',
+        message: 'Name of department?',
+        validate: validators.confirmStringValidator,
+        name: 'departmentName',
+    }).then(async (answer) => {
+        await depComms.addDepartmentByName(answer.departmentName);
+        tablePrint(await depComms.getAllDepartments());
+    }).catch((err) => {
+        sanitizeErrorForUser(err);
     })
 }
 
@@ -187,24 +251,40 @@ async function updateEmployeePrompt(){
     })
 }
 
+async function getPossibleRootPromptChoices(){
+    let departments = await depComms.getAllDepartments();
+    let roles = await roleComms.getAllRoles();
+    let employees = await empComms.getAllEmployees();
+    let choices = [
+        'add a department'
+    ];
+    console.log(departments);
+    console.log(roles);
+    console.log(employees);
+    // since you can't add a role without departments
+    if(departments.length > 0){
+        choices.push('view all departments', 'add a role');
+        //  since you can't add an employee without roles
+        if(roles.length > 0) {
+            choices.push('view all roles','add an employee');
+        }
+        // since you can't update an employee without employees
+        if(employees.length > 0){
+            choices.push('view all employees','update an employee', new inquirer.Separator(), 'more specific commands')
+        }
+    }
+    // from the start we sill need exit option, but that goes at the end
+    choices.push(new inquirer.Separator(), 'exit employee cms shell')
+    return choices;
+}
+
 async function prompt(){
+    let currentChoices = await getPossibleRootPromptChoices();
     inquirer.prompt([{
         type: 'rawlist',
         message: 'What would you like to do',
         name: 'rootAction',
-        choices: [
-            'view all departments',
-            'view all roles',
-            'view all employees',
-            'add a department',
-            'add a role',
-            'add an employee',
-            'update an employee',
-            new inquirer.Separator(),
-            'more specific commands',
-            new inquirer.Separator(),
-            'exit employee cms shell'
-        ]
+        choices: currentChoices
     }]).then(async (answer) => {
         switch (answer.rootAction){
             case 'view all departments':{
