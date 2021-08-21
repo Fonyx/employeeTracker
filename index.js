@@ -7,6 +7,7 @@ const roleComms = require('./lib/roleComms');
 const empComms = require('./lib/empComms');
 const dbComms = require('./lib/dbComms');
 const {confirmStringValidator, confirmIntValidator} = require('./helpers/validators');
+const Dict = require('./helpers/classes');
 
 async function specificPrompt(){
     return inquirer.prompt([{
@@ -54,6 +55,7 @@ async function viewPrompt(){
         name: 'table',
         choices: tables
     }]).then(async (answer) => {
+        console.log(`view ${tableName}`);
         viewTablePrompt(connection, answer.table);
     })
 }
@@ -64,30 +66,42 @@ async function viewPrompt(){
  * @returns None
  */
 async function viewTablePrompt(tableName){
-    let tables = dbComms.getTables();
+    let columns = dbComms.getColumnsByTable(tableName);
+    // make unquirer compatible list of names and set their check default to true
+    let columnNames = columns.map((parameter) => {
+        return `name: ${parameter}, checked=${true}`;
+    })
     return inquirer.prompt([{
-        type: 'list',
-        message: `How would you like to view ${tableName}`,
-        name: 'how',
-        choices: tables
+        type: 'checkbox',
+        message: `Which columns would you like to view?`,
+        name: 'columns',
+        choices: columnNames,
     }]).then(async (answer) => {
-        viewTableHow(answer.how);
+        console.log(`view ${tableName} columns: ${answer.columns}`);
+        viewTableColumns(tableName, answer.columns);
     })
 }
 
+async function viewTableColumns(tableName, columns){
+    if (columns === 'all'){
+
+    }
+}
+
 async function updatePrompt(){
-    console.log('View promp sequence');
-    
-}
-async function addPrompt(){
-    console.log('View promp sequence');
-    
-}
-async function deletePrompt(){
-    console.log('View promp sequence');
+    console.log('View prompt sequence');
     
 }
 
+async function addPrompt(){
+    console.log('Add prompt sequence');
+    
+}
+
+async function deletePrompt(){
+    console.log('Delete prompt sequence');
+    
+}
 
 async function addDepartmentPrompt(){
     // add a department
@@ -98,6 +112,40 @@ async function addDepartmentPrompt(){
         name: 'departmentName',
     }).then(async (answer) => {
         await depComms.addDepartmentByName(connection, answer.departmentName);
+        resultTable = await comms.getAllDepartments();
+        console.table(resultTable);
+    }).catch((err) => {
+        console.error(err);
+    })
+}
+
+async function addRolePrompt(){
+    // add a department
+    let departments = await depComms.getAllDepartments();
+    await inquirer.prompt([
+        {
+            type: 'input',
+            message: 'Role title?',
+            validate: confirmStringValidator,
+            name: 'title',
+        },{
+            type: 'input',
+            message: 'Role salary?',
+            validate: confirmIntValidator,
+            name: 'salary',
+        },{
+            type: 'rawlist',
+            message: 'Role department?',
+            name: 'department',
+            choices = departments,
+        }
+    ]).then(async (answers) => {
+        let department_id = depComms.getDepartmentByName(answers.departmentName);
+        let screenedAnswers = {
+            keys:[],
+            values: []
+        }
+        await depComms.addRoleByParams(connection, screenedAnswers);
         resultTable = await comms.getAllDepartments();
         console.table(resultTable);
     }).catch((err) => {
@@ -138,7 +186,7 @@ async function updateEmployeePrompt(){
     })
 }
 
-async function rootPromptUser(){
+async function prompt(){
     inquirer.prompt([{
         type: 'rawlist',
         message: 'What would you like to do',
@@ -170,7 +218,7 @@ async function rootPromptUser(){
                 break
             }
             case 'view all employees': {
-                reaultTable = await empComms.getAllEmployees();
+                resultTable = await empComms.getAllEmployees();
                 console.table(resultTable);
                 break
             }
@@ -199,10 +247,10 @@ async function rootPromptUser(){
             }
         }
     }).then(()=>{
-        rootPromptUser()
+        prompt()
     }).catch((err) => {
         console.error(err);
     })
 }
 
-rootPromptUser();
+prompt();
