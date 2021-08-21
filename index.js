@@ -1,9 +1,12 @@
-const comms = require('./helpers/comms');
+require('dotenv').config();
 const inquirer = require('inquirer');
 const mysql = require('mysql2/promise');
 const cTable = require('console.table');
+const depComms = require('./lib/depComms');
+const roleComms = require('./lib/roleComms');
+const empComms = require('./lib/empComms');
+const dbComms = require('./lib/dbComms');
 const {confirmStringValidator, confirmIntValidator} = require('./helpers/validators');
-require('dotenv').config();
 
 async function specificPrompt(){
     return inquirer.prompt([{
@@ -61,7 +64,7 @@ async function viewPrompt(){
  * @returns None
  */
 async function viewTablePrompt(tableName){
-    let tables = comms.getTables();
+    let tables = dbComms.getTables();
     return inquirer.prompt([{
         type: 'list',
         message: `How would you like to view ${tableName}`,
@@ -94,7 +97,7 @@ async function addDepartmentPrompt(){
         validate: confirmStringValidator,
         name: 'departmentName',
     }).then(async (answer) => {
-        await comms.addDepartmentByName(connection, answer.departmentName);
+        await depComms.addDepartmentByName(connection, answer.departmentName);
         resultTable = await comms.getAllDepartments();
         console.table(resultTable);
     }).catch((err) => {
@@ -135,7 +138,6 @@ async function updateEmployeePrompt(){
     })
 }
 
-
 async function rootPromptUser(){
     inquirer.prompt([{
         type: 'rawlist',
@@ -158,14 +160,18 @@ async function rootPromptUser(){
         console.log(answer);
         switch (answer.rootAction){
             case 'view all departments':{
-                resultTable = await comms.getAllDepartments();
+                resultTable = await depComms.getAllDepartments();
                 console.table(resultTable);
                 break
             }
             case 'view all roles': {
+                resultTable = await roleComms.getAllRoles();
+                console.table(resultTable);
                 break
             }
             case 'view all employees': {
+                reaultTable = await empComms.getAllEmployees();
+                console.table(resultTable);
                 break
             }
             case 'add a department': {
@@ -173,9 +179,11 @@ async function rootPromptUser(){
                 break
             }
             case 'add a role': {
+                await addRolePrompt();
                 break
             }
             case 'add an employee': {
+                await addEmployeePrompt();
                 break
             }
             case 'update an employee': {
