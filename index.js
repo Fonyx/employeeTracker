@@ -7,7 +7,8 @@ const roleComms = require('./lib/roleComms');
 const empComms = require('./lib/empComms');
 const dbComms = require('./lib/dbComms');
 const {confirmStringValidator, confirmIntValidator} = require('./helpers/validators');
-const Dict = require('./helpers/classes');
+const {Dict} = require('./helpers/classes');
+const {tablePrint, sanitizeErrorForUser} = require('./helpers/functions');
 
 async function specificPrompt(){
     return inquirer.prompt([{
@@ -44,11 +45,10 @@ async function specificPrompt(){
 
 /**
  * Determines the table the user wants to view, then calls viewTable Prompt
- * @param {mysql.connection} connection 
  * @returns None
  */
 async function viewPrompt(){
-    let tables = comms.getTables();
+    let tables = dbComms.getTables();
     return inquirer.prompt([{
         type: 'list',
         message: 'Which table would you like to view',
@@ -56,13 +56,13 @@ async function viewPrompt(){
         choices: tables
     }]).then(async (answer) => {
         console.log(`view ${tableName}`);
-        viewTablePrompt(connection, answer.table);
+        viewTablePrompt(answer.table);
     })
 }
 
 /**
- * Determines the view mode the user wants, then calls viewTableHow Prompt
- * @param {mysql.connection} connection 
+ * asks user for view columns on table provided, then calls viewTableHow Prompt
+ * @param {str} tableName a string table name to view 
  * @returns None
  */
 async function viewTablePrompt(tableName){
@@ -84,6 +84,8 @@ async function viewTablePrompt(tableName){
 
 async function viewTableColumns(tableName, columns){
     if (columns === 'all'){
+
+    }else{
 
     }
 }
@@ -111,11 +113,10 @@ async function addDepartmentPrompt(){
         validate: confirmStringValidator,
         name: 'departmentName',
     }).then(async (answer) => {
-        await depComms.addDepartmentByName(connection, answer.departmentName);
-        resultTable = await comms.getAllDepartments();
-        console.table(resultTable);
+        await depComms.addDepartmentByName(answer.departmentName);
+        tablePrint(await depComms.getAllDepartments());
     }).catch((err) => {
-        console.error(err);
+        sanitizeErrorForUser(err);
     })
 }
 
@@ -137,17 +138,17 @@ async function addRolePrompt(){
             type: 'rawlist',
             message: 'Role department?',
             name: 'department',
-            choices = departments,
+            choices: departments,
         }
     ]).then(async (answers) => {
-        let department_id = depComms.getDepartmentByName(answers.departmentName);
-        let screenedAnswers = {
-            keys:[],
-            values: []
-        }
-        await depComms.addRoleByParams(connection, screenedAnswers);
-        resultTable = await comms.getAllDepartments();
-        console.table(resultTable);
+        let department_id = await depComms.getDepartmentIdByName(answers.department);
+        let paramsDict = new Dict(
+            ['title', 'salary', 'department_id'], 
+            [answers.title, answers.salary, department_id]
+        );
+        await roleComms.addRoleWithParams(paramsDict);
+        resultTable = await roleComms.getAllRoles();
+        tablePrint(resultTable);
     }).catch((err) => {
         console.error(err);
     })
@@ -205,21 +206,18 @@ async function prompt(){
             'exit employee cms shell'
         ]
     }]).then(async (answer) => {
-        console.log(answer);
         switch (answer.rootAction){
             case 'view all departments':{
-                resultTable = await depComms.getAllDepartments();
-                console.table(resultTable);
+                tablePrint(await depComms.getAllDepartments());
                 break
             }
             case 'view all roles': {
                 resultTable = await roleComms.getAllRoles();
-                console.table(resultTable);
+                tablePrint(resultTable);
                 break
             }
             case 'view all employees': {
-                resultTable = await empComms.getAllEmployees();
-                console.table(resultTable);
+                tablePrint(await empComms.getAllEmployees())
                 break
             }
             case 'add a department': {
