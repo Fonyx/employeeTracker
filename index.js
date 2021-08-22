@@ -104,12 +104,12 @@ async function deletePrompt(){
 
 async function addEmployeePrompt(){
     // add a department
-    let employees = await empComms.getAllEmployees();
+    let employees = await empComms.getAllEmployeeNames();
     let employeeNames = employees.map((parameter) => {
         return parameter.first_name + ' ' + parameter.last_name;
     })
 
-    let roles = await roleComms.getAllRoles();
+    let roles = await roleComms.getAllRoleTitles();
     let roleNames = roles.map((parameter) => {
         return parameter.title;
     })
@@ -152,11 +152,11 @@ async function addEmployeePrompt(){
         );
         // if there is a manager, add it to the params dictionary
         if(answers.managerName){
-            let managerId = await empComms.getEmployeeIdByName(answers.managerName);
-            paramsDict.set('manager_id', managerId);
+            let managerDetails = await empComms.getEmployeeDetailsByFullname(answers.managerName);
+            paramsDict.set('manager_id', managerDetails.id);
         }
         await empComms.addEmployeeWithParams(paramsDict);
-        resultTable = await roleComms.getAllRoles();
+        resultTable = await roleComms.getAllRoleTitles();
         tablePrint(resultTable);
     }).catch((err) => {
         console.error(err);
@@ -190,7 +190,7 @@ async function addRolePrompt(){
             [answers.title, answers.salary, department_id]
         );
         await roleComms.addRoleWithParams(paramsDict);
-        resultTable = await roleComms.getAllRoles();
+        resultTable = await roleComms.getAllRoleTitles();
         tablePrint(resultTable);
     }).catch((err) => {
         console.error(err);
@@ -214,7 +214,7 @@ async function addDepartmentPrompt(){
 
 async function updateEmployeeRolePrompt(){
     // query for office number then append answer to baseAnswers
-    let employees = await empComms.getAllEmployees();
+    let employees = await empComms.getAllEmployeeNames();
     let employeeNames = employees.map((parameter) => {
         return parameter.first_name + ' ' + parameter.last_name;
     });
@@ -236,7 +236,7 @@ async function updateEmployeeRoleToPrompt(employeeName){
     let employeeDetails = await empComms.getEmployeeDetailsByFullname(employeeName);
     let currentRole = await roleComms.getRoleById(employeeDetails.id);
 
-    let roles = await roleComms.getAllRoles();
+    let roles = await roleComms.getAllRoleTitles();
     let roleNames = [];
     // make standard array of titles - remove current title from choices
     for(let i =0; i<roles.length; i++){
@@ -261,8 +261,8 @@ async function updateEmployeeRoleToPrompt(employeeName){
 
 async function getPossibleRootPromptChoices(){
     let departments = await depComms.getAllDepartments();
-    let roles = await roleComms.getAllRoles();
-    let employees = await empComms.getAllEmployees();
+    let roles = await roleComms.getAllRoleTitles();
+    let employees = await empComms.getAllEmployeeNames();
     let choices = [
         'add a department'
     ];
@@ -297,12 +297,12 @@ async function prompt(){
                 break
             }
             case 'view all roles': {
-                resultTable = await roleComms.getAllRoles();
+                resultTable = await roleComms.getAllRoleDetails();
                 tablePrint(resultTable);
                 break
             }
             case 'view all employees': {
-                tablePrint(await empComms.getAllEmployees())
+                tablePrint(await empComms.getAllEmployeeDetails())
                 break
             }
             case 'add a department': {
