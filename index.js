@@ -23,7 +23,7 @@ async function specificPrompt(){
     }]).then(async (answer) => {
         switch (answer.action){
             case 'view department budgets': {
-                tablePrint(await viewDepartmentBudgetsPrompt());
+                tablePrint(await depComms.getDepartmentBudgets());
                 break
             }
             case 'view employees by department': {
@@ -44,10 +44,6 @@ async function specificPrompt(){
             }
         }
     })
-}
-
-async function viewDepartmentBudgetsPrompt(){
-    
 }
 
 async function viewEmployeesByDepartmentPrompt(){
