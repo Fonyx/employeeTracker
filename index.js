@@ -6,7 +6,7 @@ const empComms = require('./lib/empComms');
 const dbComms = require('./lib/dbComms');
 const { validators } = require('./helpers/validators');
 const {Dict} = require('./helpers/classes');
-const {tablePrint, sanitizeErrorForUser} = require('./helpers/functions');
+const {tablePrint, sanitizeErrorForUser, getColumnFromSQLTable} = require('./helpers/functions');
 
 async function specificPrompt(){
     return inquirer.prompt([{
@@ -19,39 +19,42 @@ async function specificPrompt(){
             'view employees by manager',
             'update employee manager',
             '!delete something!',
+            'Exit Specific Menu',
         ]
     }]).then(async (answer) => {
         switch (answer.action){
             case 'view department budgets': {
                 tablePrint(await depComms.getDepartmentBudgets());
+                await specificPrompt();
                 break
             }
             case 'view employees by department': {
-                tablePrint(await viewEmployeesByDepartmentPrompt());
+                tablePrint(await empComms.getEmployeesByDepartment());
+                await specificPrompt();
                 break
             }
             case 'view employees by manager': {
-                tablePrint(await viewEmployeesByManagerPrompt());
+                tablePrint(await empComms.getEmployeesByManager());
+                await specificPrompt();
                 break
             }
             case 'update employee manager': {
                 tablePrint(await updateEmployeeManagerPrompt());
+                await specificPrompt();
                 break
             }
             case '!delete something!': {
                 tablePrint(await deletePrompt());
+                await specificPrompt();
                 break
             }
+            case 'Exit Specific Menu':{
+                return
+            }
         }
+    }).then().catch((error) => {
+        console.error(error);
     })
-}
-
-async function viewEmployeesByDepartmentPrompt(){
-
-}
-
-async function viewEmployeesByManagerPrompt(){
-
 }
 
 async function updateEmployeeManagerPrompt(){
@@ -239,7 +242,7 @@ async function getPossibleRootPromptChoices(){
         }
     }
     // from the start we sill need exit option, but that goes at the end
-    choices.push(new inquirer.Separator(), 'exit employee cms shell')
+    choices.push(new inquirer.Separator(), 'exit employee cms shell',new inquirer.Separator())
     return choices;
 }
 
@@ -290,7 +293,7 @@ async function prompt(){
             }
         }
     }).then(()=>{
-        prompt()
+        prompt();
     }).catch((err) => {
         console.error(err);
     })
