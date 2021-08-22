@@ -218,38 +218,43 @@ async function updateEmployeeRolePrompt(){
     let employeeNames = employees.map((parameter) => {
         return parameter.first_name + ' ' + parameter.last_name;
     });
-
-    let roles = await roleComms.getAllRoles();
-    let roleNames = roles.map((parameter) => {
-        return parameter.title;
-    })
-
     await inquirer.prompt([{
         type: 'list',
         message: "Which employee's role do you want to update?",
         choices: employeeNames,
         name: 'employee',
-    },{
-        type: 'list',
-        message: 'What is their new role',
-        choices: roleNames,
-        name: 'role',
     }])
     .then(async (answer) => {
-        // if the chosen employee's role
-        let employeeDetails = await empComms.getEmployeeDetailsByFullname(answer.employee);
-        let currentRole = await roleComms.getRoleById(employeeDetails.id);
-        let newRole = await roleComms.getRoleByTitle(answer.role);
-        if(currentRole.title !== answer.role){
-            // update the role
-            await empComms.updateEmployeeRoleById(employeeDetails.id, newRole.id);
-            tablePrint(await empComms.getEmployeeDetailsById(employeeDetails.id));
-        } else {
-            console.log('The user already has that role, try again');
-            await updateEmployeeRolePrompt();
-        }
+        await updateEmployeeRoleToPrompt(answer.employee);
     })
     .catch((err) =>{
+        console.error(err);
+    })
+}
+
+async function updateEmployeeRoleToPrompt(employeeName){
+    let employeeDetails = await empComms.getEmployeeDetailsByFullname(employeeName);
+    let currentRole = await roleComms.getRoleById(employeeDetails.id);
+
+    let roles = await roleComms.getAllRoles();
+    let roleNames = [];
+    // make standard array of titles - remove current title from choices
+    for(let i =0; i<roles.length; i++){
+        let roleName = roles[i].title;
+        if(roleName !== currentRole.title){
+            roleNames.push(roleName);
+        }
+    }
+    await inquirer.prompt({
+        type: 'list',
+        message: 'What is their new role?',
+        choices: roleNames,
+        name: 'role',
+    }).then(async (answer)=>{
+        let newRole = await roleComms.getRoleByTitle(answer.role);
+        await empComms.updateEmployeeRoleById(employeeDetails.id, newRole.id);
+        tablePrint(await empComms.getEmployeeDetailsById(employeeDetails.id));
+    }).catch((err) => {
         console.error(err);
     })
 }
