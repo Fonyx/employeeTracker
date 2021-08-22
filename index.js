@@ -1,7 +1,5 @@
 require('dotenv').config();
 const inquirer = require('inquirer');
-const mysql = require('mysql2/promise');
-const cTable = require('console.table');
 const depComms = require('./lib/depComms');
 const roleComms = require('./lib/roleComms');
 const empComms = require('./lib/empComms');
