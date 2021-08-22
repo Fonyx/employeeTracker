@@ -12,92 +12,58 @@ async function specificPrompt(){
     return inquirer.prompt([{
         type: 'list',
         message: 'What would you like to do',
-        name: 'rootAction',
+        name: 'action',
         choices: [
-            'view',
-            'update',
-            'add',
-            'delete',
+            'view department budgets',
+            'view employees by department',
+            'view employees by manager',
+            'update employee manager',
+            '!delete something!',
         ]
     }]).then(async (answer) => {
-        switch (answer.rootAction){
-            case 'view': {
-                viewPrompt();
+        switch (answer.action){
+            case 'view department budgets': {
+                tablePrint(await viewDepartmentBudgetsPrompt());
                 break
             }
-            case 'update': {
-                updatePrompt();
+            case 'view employees by department': {
+                tablePrint(await viewEmployeesByDepartmentPrompt());
                 break
             }
-            case 'add': {
-                addPrompt();
+            case 'view employees by manager': {
+                tablePrint(await viewEmployeesByManagerPrompt());
                 break
             }
-            case 'delete': {
-                deletePrompt();
+            case 'update employee manager': {
+                tablePrint(await updateEmployeeManagerPrompt());
+                break
+            }
+            case '!delete something!': {
+                tablePrint(await deletePrompt());
                 break
             }
         }
     })
 }
 
-/**
- * Determines the table the user wants to view, then calls viewTable Prompt
- * @returns None
- */
-async function viewPrompt(){
-    let tables = dbComms.getTables();
-    return inquirer.prompt([{
-        type: 'list',
-        message: 'Which table would you like to view',
-        name: 'table',
-        choices: tables
-    }]).then(async (answer) => {
-        viewTablePrompt(answer.table);
-    })
-}
-
-/**
- * asks user for view columns on table provided, then calls viewTableHow Prompt
- * @param {str} tableName a string table name to view 
- * @returns None
- */
-async function viewTablePrompt(tableName){
-    let columns = dbComms.getColumnsByTable(tableName);
-    // make unquirer compatible list of names and set their check default to true
-    let columnNames = columns.map((parameter) => {
-        return `name: ${parameter}, checked=${true}`;
-    })
-    return inquirer.prompt([{
-        type: 'checkbox',
-        message: `Which columns would you like to view?`,
-        name: 'columns',
-        choices: columnNames,
-    }]).then(async (answer) => {
-        viewTableColumns(tableName, answer.columns);
-    })
-}
-
-async function viewTableColumns(tableName, columns){
-    if (columns === 'all'){
-
-    }else{
-
-    }
-}
-
-async function addPrompt(){
-    console.log('Add prompt sequence');
-}
-
-async function updatePrompt(){
-    console.log('View prompt sequence');
+async function viewDepartmentBudgetsPrompt(){
     
+}
+
+async function viewEmployeesByDepartmentPrompt(){
+
+}
+
+async function viewEmployeesByManagerPrompt(){
+
+}
+
+async function updateEmployeeManagerPrompt(){
+
 }
 
 async function deletePrompt(){
-    console.log('Delete prompt sequence');
-    
+
 }
 
 async function addEmployeePrompt(){
