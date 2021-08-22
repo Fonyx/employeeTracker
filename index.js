@@ -12,7 +12,7 @@ const {tablePrint, sanitizeErrorForUser} = require('./helpers/functions');
 
 async function specificPrompt(){
     return inquirer.prompt([{
-        type: 'rawlist',
+        type: 'list',
         message: 'What would you like to do',
         name: 'rootAction',
         choices: [
@@ -130,12 +130,12 @@ async function addEmployeePrompt(){
             validate: validators.confirmStringNoSpaceValidator,
             name: 'lastName',
         },{
-            type: 'rawlist',
+            type: 'list',
             message: 'Role?',
             name: 'roleName',
             choices: roleNames,
         },{
-            type: 'rawlist',
+            type: 'list',
             message: 'Manager?',
             name: 'managerName',
             choices: employeeNames,
@@ -184,7 +184,7 @@ async function addRolePrompt(){
             validate: validators.confirmIntValidator,
             name: 'salary',
         },{
-            type: 'rawlist',
+            type: 'list',
             message: 'Role department?',
             name: 'department',
             choices: departments,
@@ -218,32 +218,43 @@ async function addDepartmentPrompt(){
     })
 }
 
-async function updateEmployeePrompt(){
+async function updateEmployeeRolePrompt(){
     // query for office number then append answer to baseAnswers
-    await inquirer.prompt({
-        type: 'rawlist',
-        message: 'What do you want to update?',
-        choices:['first name', 'last name', 'role','manager'],
-        name: 'updateType',
+    let employees = await empComms.getAllEmployees();
+    let employeeNames = employees.map((parameter) => {
+        return parameter.first_name + ' ' + parameter.last_name;
+    });
+    console.log(employeeNames);
+
+    let roles = await roleComms.getAllRoles();
+    let roleNames = roles.map((parameter) => {
+        return parameter.title;
     })
+    console.log(roleNames);
+
+    await inquirer.prompt([{
+        type: 'list',
+        message: "Which employee's role do you want to update?",
+        choices: employeeNames,
+        name: 'employee',
+    },{
+        type: 'list',
+        message: 'What is their new role',
+        choices: roleNames,
+        name: 'role',
+    }])
     .then(async (answer) => {
-        switch (answer.updateType){
-            case 'first name': {
-                console.log('updating first name');
-                break
-            }
-            case 'last name': {
-                console.log('updating last name');
-                break
-            }
-            case 'role': {
-                console.log('updating role');
-                break
-            }
-            case 'manager': {
-                console.log('updating manager');
-                break
-            }  
+        // if the chosen employee's role
+        let employeeDetails = await empComms.getEmployeeDetailsByFullname(answer.employee);
+        let currentRole = await roleComms.getRoleById(employeeDetails.id);
+        let newRole = await roleComms.getRoleByTitle(answer.role);
+        if(currentRole.title !== answer.role){
+            // update the role
+            await empComms.updateEmployeeRoleById(employeeDetails.id, newRole.id);
+            tablePrint(await empComms.getEmployeeDetailsById(employeeDetails.id));
+        } else {
+            console.log('The user already has that role, try again');
+            await updateEmployeeRolePrompt();
         }
     })
     .catch((err) =>{
@@ -270,7 +281,7 @@ async function getPossibleRootPromptChoices(){
         }
         // since you can't update an employee without employees
         if(employees.length > 0){
-            choices.push('view all employees','update an employee', new inquirer.Separator(), 'more specific commands')
+            choices.push('view all employees',"update an employee's role", new inquirer.Separator(), 'more specific commands')
         }
     }
     // from the start we sill need exit option, but that goes at the end
@@ -281,7 +292,7 @@ async function getPossibleRootPromptChoices(){
 async function prompt(){
     let currentChoices = await getPossibleRootPromptChoices();
     inquirer.prompt([{
-        type: 'rawlist',
+        type: 'list',
         message: 'What would you like to do',
         name: 'rootAction',
         choices: currentChoices
@@ -312,8 +323,8 @@ async function prompt(){
                 await addEmployeePrompt();
                 break
             }
-            case 'update an employee': {
-                await updateEmployeePrompt();
+            case "update an employee's role": {
+                await updateEmployeeRolePrompt();
                 break
             }
             case 'more specific commands': {
