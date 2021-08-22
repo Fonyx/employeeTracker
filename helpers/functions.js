@@ -15,22 +15,7 @@ function sanitizeErrorForUser(error){
     }
 }
 
-/**
- * Function that returns the rows of columns requested
- * @param {List of Binary Row} table 
- * @param {str} str Column to return
- */
-function getColumnFromSQLTable(table, column){
-    let result = [];
-    for(let i =0; i<table.length;i++){
-        let current = table[i][column];
-        result.push(current);
-    }
-    return result;
-}
-
 module.exports = {
     tablePrint,
     sanitizeErrorForUser,
-    getColumnFromSQLTable,
 }

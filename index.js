@@ -6,7 +6,7 @@ const empComms = require('./lib/empComms');
 const dbComms = require('./lib/dbComms');
 const { validators } = require('./helpers/validators');
 const {Dict} = require('./helpers/classes');
-const {tablePrint, sanitizeErrorForUser, getColumnFromSQLTable} = require('./helpers/functions');
+const {tablePrint, sanitizeErrorForUser} = require('./helpers/functions');
 
 async function specificPrompt(){
     return inquirer.prompt([{
@@ -39,12 +39,12 @@ async function specificPrompt(){
                 break
             }
             case 'update employee manager': {
-                tablePrint(await updateEmployeeManagerPrompt());
+                await specificUpdatePrompt();
                 await specificPrompt();
                 break
             }
             case '!delete something!': {
-                tablePrint(await deletePrompt());
+                await deletePrompt();
                 await specificPrompt();
                 break
             }
@@ -57,8 +57,54 @@ async function specificPrompt(){
     })
 }
 
-async function updateEmployeeManagerPrompt(){
+/**
+ * function that gets employee of concern for employee manager update
+ */
+async function specificUpdatePrompt(){
+    let employees = await empComms.getAllEmployeeNames();
+    let employeeNames = employees.map((parameter) => {
+        return parameter.first_name + ' ' + parameter.last_name;
+    });
+    await inquirer.prompt({
+        type:'list',
+        message: 'Which employee do you want to change manager for?',
+        name: 'employee',
+        choices: employeeNames,
+    }).then(async (answer) => {
+        await specificUpdateEmployeePrompt(answer.employee);
+    }).catch((error)=>{
+        console.error(error);
+    })
+}
 
+async function specificUpdateEmployeePrompt(employeeName){
+    let currentEmployeeDetails = await empComms.getEmployeeDetailsByFullname(employeeName);
+    let allEmployees = await empComms.getAllEmployeeNames();
+    let allEmployeeNames = allEmployees.map((parameter) => {
+        return parameter.first_name + ' ' + parameter.last_name;
+    });
+    let currentManager = await empComms.getEmployeeDetailsById(currentEmployeeDetails.manager_id);
+    let currentManagerName = currentManager.first_name.concat(' ', currentManager.last_name);
+    let possibleManagers = [];
+    // remove current employee and current manager from list of employees
+    for(let i = 0; i<allEmployeeNames.length; i++){
+        let name = allEmployeeNames[i];
+        if(name !== employeeName && name !== currentManagerName){
+            possibleManagers.push(name);
+        }
+    }
+    await inquirer.prompt({
+        type:'list',
+        message:'Who is the new manager',
+        name:'newManager',
+        choices: possibleManagers,
+        pageSize: 12
+    }).then(async (answer)=>{
+        let managerDetails = await empComms.getEmployeeDetailsByFullname(answer.newManager);
+        await empComms.updateEmployeeManager(currentEmployeeDetails.id, managerDetails.id);
+    }).catch((err)=>{
+        console.log(err)
+    })
 }
 
 async function deletePrompt(){
@@ -252,7 +298,8 @@ async function prompt(){
         type: 'list',
         message: 'What would you like to do',
         name: 'rootAction',
-        choices: currentChoices
+        choices: currentChoices,
+        pageSize: 15
     }]).then(async (answer) => {
         switch (answer.rootAction){
             case 'view all departments':{
