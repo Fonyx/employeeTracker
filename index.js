@@ -55,7 +55,6 @@ async function viewPrompt(){
         name: 'table',
         choices: tables
     }]).then(async (answer) => {
-        console.log(`view ${tableName}`);
         viewTablePrompt(answer.table);
     })
 }
@@ -77,7 +76,6 @@ async function viewTablePrompt(tableName){
         name: 'columns',
         choices: columnNames,
     }]).then(async (answer) => {
-        console.log(`view ${tableName} columns: ${answer.columns}`);
         viewTableColumns(tableName, answer.columns);
     })
 }
@@ -92,7 +90,6 @@ async function viewTableColumns(tableName, columns){
 
 async function addPrompt(){
     console.log('Add prompt sequence');
-    
 }
 
 async function updatePrompt(){
@@ -111,13 +108,11 @@ async function addEmployeePrompt(){
     let employeeNames = employees.map((parameter) => {
         return parameter.first_name + ' ' + parameter.last_name;
     })
-    console.log(employeeNames);
 
     let roles = await roleComms.getAllRoles();
     let roleNames = roles.map((parameter) => {
         return parameter.title;
     })
-    console.log(roleNames);
     await inquirer.prompt([
         {
             type: 'input',
@@ -140,7 +135,6 @@ async function addEmployeePrompt(){
             name: 'managerName',
             choices: employeeNames,
             when: () => {
-                console.log(employeeNames);
                 if(employeeNames.length > 0){
                     return true;
                 } else {
@@ -224,13 +218,11 @@ async function updateEmployeeRolePrompt(){
     let employeeNames = employees.map((parameter) => {
         return parameter.first_name + ' ' + parameter.last_name;
     });
-    console.log(employeeNames);
 
     let roles = await roleComms.getAllRoles();
     let roleNames = roles.map((parameter) => {
         return parameter.title;
     })
-    console.log(roleNames);
 
     await inquirer.prompt([{
         type: 'list',
@@ -269,9 +261,6 @@ async function getPossibleRootPromptChoices(){
     let choices = [
         'add a department'
     ];
-    console.log(departments);
-    console.log(roles);
-    console.log(employees);
     // since you can't add a role without departments
     if(departments.length > 0){
         choices.push('view all departments', 'add a role');
