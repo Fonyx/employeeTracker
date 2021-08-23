@@ -71,6 +71,7 @@ async function specificUpdatePrompt(){
         message: 'Which employee do you want to change manager for?',
         name: 'employee',
         choices: employeeNames,
+        pageSize: 15
     }).then(async (answer) => {
         await specificUpdateEmployeePrompt(answer.employee);
     }).catch((error)=>{
@@ -148,7 +149,8 @@ async function deleteFromDepartmentPrompt(){
         type: 'input',
         message: 'id of item to delete?',
         name: 'id',
-        validate: validators.confirmIntValidator
+        validate: validators.confirmIntValidator,
+        pageSize: 15,
     }).then(async (answer) => {
         await depComms.deleteDepartmentById(answer.id);
     }).catch((error)=>{console.log(error)});
@@ -160,18 +162,21 @@ async function deleteFromRolePrompt(){
         type: 'input',
         message: 'id of item to delete?',
         name: 'id',
-        validate: validators.confirmIntValidator
+        validate: validators.confirmIntValidator,
+        pageSize: 15,
     }).then( async (answer) => {
         await roleComms.deleteRoleById(answer.id);
     }).catch((error)=>{console.log(error)});
 }
+
 async function deleteFromEmployeePrompt(){
     tablePrint(await empComms.getAllEmployeeDetails());
     await inquirer.prompt({
         type: 'input',
         message: 'id of item to delete?',
         name: 'id',
-        validate: validators.confirmIntValidator
+        validate: validators.confirmIntValidator,
+        pageSize: 15,
     }).then(async (answer) => {
         await empComms.deleteEmployeeById(answer.id);
     }).catch((error)=>{console.log(error)});
@@ -204,6 +209,7 @@ async function addEmployeePrompt(){
             message: 'Role?',
             name: 'roleName',
             choices: roleNames,
+            pageSize: 15,
         },{
             type: 'list',
             message: 'Manager?',
@@ -216,6 +222,7 @@ async function addEmployeePrompt(){
                     return false
                 }
             },
+            pageSize: 15,
         }
     ]).then(async (answers) => {
         // get the role id for the name chosen
@@ -257,6 +264,7 @@ async function addRolePrompt(){
             message: 'Role department?',
             name: 'department',
             choices: departments,
+            pageSize: 15,
         }
     ]).then(async (answers) => {
         let department_id = await depComms.getDepartmentIdByName(answers.department);
@@ -279,6 +287,7 @@ async function addDepartmentPrompt(){
         message: 'Name of department?',
         validate: validators.confirmStringValidator,
         name: 'departmentName',
+        pageSize: 15,
     }).then(async (answer) => {
         await depComms.addDepartmentByName(answer.departmentName);
         tablePrint(await depComms.getAllDepartments());
@@ -298,6 +307,7 @@ async function updateEmployeeRolePrompt(){
         message: "Which employee's role do you want to update?",
         choices: employeeNames,
         name: 'employee',
+        pageSize: 15
     }])
     .then(async (answer) => {
         await updateEmployeeRoleToPrompt(answer.employee);
@@ -325,6 +335,7 @@ async function updateEmployeeRoleToPrompt(employeeName){
         message: 'What is their new role?',
         choices: roleNames,
         name: 'role',
+        pageSize: 15,
     }).then(async (answer)=>{
         let newRole = await roleComms.getRoleByTitle(answer.role);
         await empComms.updateEmployeeRoleById(employeeDetails.id, newRole.id);
