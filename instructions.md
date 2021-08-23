@@ -52,7 +52,7 @@ You might also want to make your queries asynchronous. MySQL2 exposes a `.promis
 
 Design the database schema as shown in the following image:
 
-![Database schema includes tables labeled “employee,” role,” and “department.”](./assets/12-sql-homework-demo-01.png)
+![Database schema includes tables labeled “employee,” role,” and “department.”](./assets/structure.png)
 
 As the image illustrates, your schema should contain the following three tables:
 
