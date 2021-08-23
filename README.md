@@ -76,8 +76,8 @@ Walkthrough Video: https://drive.google.com/file/d/1LGMTJctBGjotc_yrhomMg6Oit9Wo
     DB_PASS=password
     - note the lack of quotes on anything
 6. Enter mysql Shell and run db/source.sql to setup database structure
-7. (Optional) run db/seeds.sql to populate with fake seed data if you are assessing the cli - HINT TO ADMINISTRATORS!
-8. Run npm start from outside mysql shell
+7. (Optional) "npm run seed" to populate with fake seed data if you are assessing the cli - HINT TO ADMINISTRATORS!
+8. Run npm start to open cms shell
 
 ## Credits
 
