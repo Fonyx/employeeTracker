@@ -236,7 +236,11 @@ async function addEmployeePrompt(){
         resultTable = await roleComms.getAllRoleTitles();
         tablePrint(resultTable);
     }).catch((err) => {
-        console.error(err);
+        if(err.code === 'ER_DUP_ENTRY'){
+            console.log(`That employee already exists, no db action taken`);
+        } else {
+            console.error(err);
+        }
     })
 }
 
