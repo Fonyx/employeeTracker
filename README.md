@@ -71,7 +71,10 @@ Walkthrough Video: https://drive.google.com/file/d/1LGMTJctBGjotc_yrhomMg6Oit9Wo
 2. Install Mysql and built root user
 3. Checkout software
 4. Run npm install to gather dependencies
-5. Add your mysql local instance user details to the .env file
+5. Add your mysql local instance user details into a root directory (employeeTracker root) .env file as
+    DB_USER=username
+    DB_PASS=password
+    - note the lack of quotes on anything
 6. Enter mysql Shell and run db/source.sql to setup database structure
 7. (Optional) run db/seeds.sql to populate with fake seed data if you are assessing the cli - HINT TO ADMINISTRATORS!
 8. Run npm start from outside mysql shell
