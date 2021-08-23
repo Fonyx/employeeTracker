@@ -1,5 +1,5 @@
 {
-  "name": "employeetracker",
+  "name": "employeeTracker",
   "version": "1.0.0",
   "description": "A node CMS project for employee management",
   "main": "index.js",
@@ -12,8 +12,8 @@
     "url": "git+https://github.com/Fonyx/employeeTracker.git"
   },
   "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "author": "Fonyx",
+  "license": "MIT License",
   "bugs": {
     "url": "https://github.com/Fonyx/employeeTracker/issues"
   },
