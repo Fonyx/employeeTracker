@@ -3,7 +3,6 @@ const inquirer = require('inquirer');
 const depComms = require('./lib/depComms');
 const roleComms = require('./lib/roleComms');
 const empComms = require('./lib/empComms');
-const dbComms = require('./lib/dbComms');
 const { validators } = require('./helpers/validators');
 const {Dict} = require('./helpers/classes');
 const {tablePrint, sanitizeErrorForUser} = require('./helpers/functions');
@@ -104,6 +103,7 @@ async function specificUpdateEmployeePrompt(employeeName){
     }).then(async (answer)=>{
         let managerDetails = await empComms.getEmployeeDetailsByFullname(answer.newManager);
         await empComms.updateEmployeeManager(currentEmployeeDetails.id, managerDetails.id);
+        console.log(`Updated ${employeeName}'s manager to ${managerDetails.first_name + managerDetails.last_name}`)
     }).catch((err)=>{
         console.log(err)
     })
@@ -189,6 +189,8 @@ async function addEmployeePrompt(){
         return parameter.first_name + ' ' + parameter.last_name;
     })
 
+    employeeNames.unshift('-- NO MANAGER --');
+
     let roles = await roleComms.getAllRoleTitles();
     let roleNames = roles.map((parameter) => {
         return parameter.title;
@@ -215,13 +217,6 @@ async function addEmployeePrompt(){
             message: 'Manager?',
             name: 'managerName',
             choices: employeeNames,
-            when: () => {
-                if(employeeNames.length > 0){
-                    return true;
-                } else {
-                    return false
-                }
-            },
             pageSize: 15,
         }
     ]).then(async (answers) => {
@@ -233,10 +228,10 @@ async function addEmployeePrompt(){
             [answers.firstName, answers.lastName, roleId]
         );
         // if there is a manager, add it to the params dictionary
-        if(answers.managerName){
-            let managerDetails = await empComms.getEmployeeDetailsByFullname(answers.managerName);
+        if(answers.managerName !== '-- NO MANAGER --'){
+            var managerDetails = await empComms.getEmployeeDetailsByFullname(answers.managerName);
             paramsDict.set('manager_id', managerDetails.id);
-        }
+        } 
         await empComms.addEmployeeWithParams(paramsDict);
         resultTable = await roleComms.getAllRoleTitles();
         tablePrint(resultTable);
@@ -319,7 +314,7 @@ async function updateEmployeeRolePrompt(){
 
 async function updateEmployeeRoleToPrompt(employeeName){
     let employeeDetails = await empComms.getEmployeeDetailsByFullname(employeeName);
-    let currentRole = await roleComms.getRoleById(employeeDetails.id);
+    let currentRole = await roleComms.getRoleById(employeeDetails.role_id);
 
     let roles = await roleComms.getAllRoleTitles();
     let roleNames = [];
@@ -339,7 +334,8 @@ async function updateEmployeeRoleToPrompt(employeeName){
     }).then(async (answer)=>{
         let newRole = await roleComms.getRoleByTitle(answer.role);
         await empComms.updateEmployeeRoleById(employeeDetails.id, newRole.id);
-        tablePrint(await empComms.getEmployeeDetailsById(employeeDetails.id));
+        await empComms.getEmployeeDetailsById(employeeDetails.id);
+        console.log(`New Role ${newRole.title} update`);
     }).catch((err) => {
         console.error(err);
     })
