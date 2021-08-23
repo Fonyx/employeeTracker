@@ -18,7 +18,7 @@ async function specificPrompt(){
             'view employees by department',
             'view employees by manager',
             'update employee manager',
-            '!delete something!',
+            '!enter delete mode!',
             'Exit Specific Menu',
         ]
     }]).then(async (answer) => {
@@ -43,7 +43,8 @@ async function specificPrompt(){
                 await specificPrompt();
                 break
             }
-            case '!delete something!': {
+            case '!enter delete mode!': {
+                console.log('\x1b[31m%s', 'Entering Delete Mode, be careful');
                 await deletePrompt();
                 await specificPrompt();
                 break
@@ -108,7 +109,72 @@ async function specificUpdateEmployeePrompt(employeeName){
 }
 
 async function deletePrompt(){
+    await inquirer.prompt({
+       type: 'list',
+       message: 'What would you like to delete?',
+       name: 'table',
+       choices: ['department', 'role', 'employee', 'exit delete mode'],
+    }).then(async (answers)=>{
+        if(answers.table !== 'exit delete mode'){
+            switch (answers.table){
+                case 'department': {
+                    await deleteFromDepartmentPrompt();
+                    await deletePrompt();
+                    break
+                }
+                case 'role': {
+                    await deleteFromRolePrompt();
+                    await deletePrompt();
+                    break
+                }
+                case 'employee': {
+                    await deleteFromEmployeePrompt();
+                    await deletePrompt();
+                    break
+                }
+            }
+        } else {
+            console.log('\x1b[30m%s', 'Exiting Delete Mode')
+            return
+        }
+    }).catch((error) =>{
+        console.log(error);
+    });
+}
 
+async function deleteFromDepartmentPrompt(){
+    tablePrint(await depComms.getAllDepartments());
+    await inquirer.prompt({
+        type: 'input',
+        message: 'id of item to delete?',
+        name: 'id',
+        validate: validators.confirmIntValidator
+    }).then(async (answer) => {
+        await depComms.deleteDepartmentById(answer.id);
+    }).catch((error)=>{console.log(error)});
+}
+
+async function deleteFromRolePrompt(){
+    tablePrint(await roleComms.getAllRoleDetails());
+    await inquirer.prompt({
+        type: 'input',
+        message: 'id of item to delete?',
+        name: 'id',
+        validate: validators.confirmIntValidator
+    }).then( async (answer) => {
+        await roleComms.deleteRoleById(answer.id);
+    }).catch((error)=>{console.log(error)});
+}
+async function deleteFromEmployeePrompt(){
+    tablePrint(await empComms.getAllEmployeeDetails());
+    await inquirer.prompt({
+        type: 'input',
+        message: 'id of item to delete?',
+        name: 'id',
+        validate: validators.confirmIntValidator
+    }).then(async (answer) => {
+        await empComms.deleteEmployeeById(answer.id);
+    }).catch((error)=>{console.log(error)});
 }
 
 async function addEmployeePrompt(){
@@ -294,7 +360,7 @@ async function getPossibleRootPromptChoices(){
 
 async function prompt(){
     let currentChoices = await getPossibleRootPromptChoices();
-    inquirer.prompt([{
+    await inquirer.prompt([{
         type: 'list',
         message: 'What would you like to do',
         name: 'rootAction',
@@ -304,43 +370,51 @@ async function prompt(){
         switch (answer.rootAction){
             case 'view all departments':{
                 tablePrint(await depComms.getAllDepartments());
+                await prompt();
                 break
             }
             case 'view all roles': {
                 resultTable = await roleComms.getAllRoleDetails();
                 tablePrint(resultTable);
+                await prompt();
                 break
             }
             case 'view all employees': {
                 tablePrint(await empComms.getAllEmployeeDetails())
+                await prompt();
                 break
             }
             case 'add a department': {
                 await addDepartmentPrompt();
+                await prompt();
                 break
             }
             case 'add a role': {
                 await addRolePrompt();
+                await prompt();
                 break
             }
             case 'add an employee': {
                 await addEmployeePrompt();
+                await prompt();
                 break
             }
             case "update an employee's role": {
                 await updateEmployeeRolePrompt();
+                await prompt();
                 break
             }
             case 'more specific commands': {
                 await specificPrompt();
+                await prompt();
                 break
             }
             case 'exit employee cms shell':{
-                return
+                console.log('Exiting');
+                break
             }
         }
     }).then(()=>{
-        prompt();
     }).catch((err) => {
         console.error(err);
     })
