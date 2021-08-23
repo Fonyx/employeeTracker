@@ -269,9 +269,13 @@ async function addRolePrompt(){
         );
         await roleComms.addRoleWithParams(paramsDict);
         resultTable = await roleComms.getAllRoleTitles();
-        tablePrint(resultTable);
+        console.log(`Added role: ${answers.title} to ${answers.department}`);
     }).catch((err) => {
-        console.error(err);
+        if(err.code === 'ER_DUP_ENTRY'){
+            console.log('That role already exists');
+        } else {
+            console.error(err);
+        }
     })
 }
 
