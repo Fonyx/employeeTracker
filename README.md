@@ -9,7 +9,7 @@
 ## Description
 
 A node CMS project for employee management  
-![Alt text](https://github.com/Fonyx/employeeTracker/blob/main/assets/structure.png?raw=true "db structure")
+![Alt text](https://github.com/Fonyx/employeeTracker/blob/main/assets/show.gif?raw=true "Using cli")
 
 ## License
 
