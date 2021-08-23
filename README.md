@@ -59,6 +59,8 @@ GNU General Public License v3.0
 3. Follow prompt to complete desired action
 4. Select 'exit cms' when done  
 
+Walkthrough Video: https://drive.google.com/file/d/1LGMTJctBGjotc_yrhomMg6Oit9WoTgwS/view
+
 ## Contributors 
 
 [Fonyx](https://github.com/Fonyx)
@@ -69,9 +71,10 @@ GNU General Public License v3.0
 2. Install Mysql and built root user
 3. Checkout software
 4. Run npm install to gather dependencies
-5. Enter mysql Shell and run db/source.sql to setup database structure
-6. (Optional) run db/seeds.sql to populate with fake seed data if you are assessing the cli - HINT TO ADMINISTRATORS!
-7. Run npm start from outside mysql shell
+5. Add your mysql local instance user details to the .env file
+6. Enter mysql Shell and run db/source.sql to setup database structure
+7. (Optional) run db/seeds.sql to populate with fake seed data if you are assessing the cli - HINT TO ADMINISTRATORS!
+8. Run npm start from outside mysql shell
 
 ## Credits
 
